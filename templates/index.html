@@ -43,6 +43,28 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .btn:hover,.btn.on{border-color:var(--accent);color:var(--accent)}
 .btn-p{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
 .btn-d{background:rgba(255,34,68,.1);border-color:var(--red);color:var(--red)}
+.btn-mode{position:relative;overflow:hidden}
+.btn-mode.observe{border-color:var(--accent2);color:var(--accent2);background:rgba(0,136,204,.1)}
+.btn-mode.active-mode{border-color:var(--orange);color:var(--orange);background:rgba(255,136,0,.1)}
+.mode-badge{position:absolute;top:-1px;right:-1px;font-size:7px;font-weight:700;letter-spacing:1px;
+  padding:2px 4px;border-radius:0 4px 0 4px;background:var(--orange);color:#000;text-transform:uppercase}
+/* Autonomous action banner */
+.auto-banner{display:none;position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:900;
+  background:rgba(255,136,0,.15);border:1px solid var(--orange);border-radius:8px;
+  padding:8px 20px;font-size:12px;color:var(--orange);letter-spacing:1px;text-align:center;
+  backdrop-filter:blur(4px)}
+.auto-banner.on{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;top:56px}to{opacity:1;top:62px}}
+/* Equipment stopped state */
+.stopped-overlay{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:900;
+  background:rgba(255,34,68,.12);border:1px solid var(--red);border-radius:10px;
+  padding:12px 24px;text-align:center;backdrop-filter:blur(4px)}
+.stopped-overlay.on{display:block}
+.stopped-title{font-size:13px;font-weight:700;color:var(--red);letter-spacing:2px;margin-bottom:6px}
+.stopped-btn{padding:6px 20px;background:rgba(0,255,136,.15);border:1px solid var(--green);
+  color:var(--green);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:2px;border-radius:5px;cursor:pointer;transition:.2s}
+.stopped-btn:hover{background:rgba(0,255,136,.3)}
 
 /* MAIN */
 .main{position:relative;z-index:1;display:grid;
@@ -51,7 +73,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
   height:calc(100vh - 52px);padding:10px;gap:9px;overflow:hidden}
 
 /* LEFT SIDEBAR */
-.sidebar{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow-y:auto;overflow-x:hidden}
+.sidebar{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .sec-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);padding:2px 0;flex-shrink:0}
@@ -117,8 +139,8 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 /* Mini charts grid — below risk timeline */
 .charts-wrap{flex:1;min-height:0;overflow:hidden}
-.charts-grid{display:grid;gap:8px;height:100%}
-/* default 4-col; JS adjusts based on visible count */
+.charts-grid{display:grid;gap:8px;height:100%;align-content:start}
+/* cols/rows managed by JS */
 .chart-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .chart-card.hidden{display:none}
 .c-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;flex-shrink:0}
@@ -144,6 +166,8 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 .alerts{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;min-height:0}
 .a-head{padding:7px 11px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.a-clear{font-size:9px;color:var(--dim);cursor:pointer;border:1px solid var(--border);background:transparent;border-radius:3px;padding:1px 6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:.2s}
+.a-clear:hover{color:var(--red);border-color:var(--red)}
 .a-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
 .a-cnt{font-size:10px;font-weight:700;background:rgba(255,34,68,.2);color:var(--red);padding:1px 6px;border-radius:8px;display:none}
 .a-cnt.on{display:block}
@@ -161,6 +185,17 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .bi{background:rgba(0,136,204,.3);color:var(--accent)}
 .bw{background:rgba(255,204,0,.2);color:var(--yellow)}
 .bc{background:rgba(255,34,68,.25);color:var(--red)}
+
+/* Incident detail popup */
+.inc-detail{position:fixed;z-index:1500;background:var(--panel2);border:1px solid var(--red);border-radius:10px;
+  padding:14px 16px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.6);pointer-events:all}
+.inc-detail-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;font-weight:700}
+.inc-detail-row{display:flex;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.inc-detail-row:last-child{border-bottom:none}
+.inc-detail-key{color:var(--dim)}
+.inc-detail-val{font-family:'Share Tech Mono',monospace;color:var(--accent)}
+.badge.bc{cursor:pointer;transition:.15s}
+.badge.bc:hover{background:rgba(255,34,68,.5);transform:scale(1.05)}
 
 /* Overlays */
 .flash{position:fixed;inset:0;z-index:999;pointer-events:none;background:rgba(255,34,68,0)}
@@ -192,6 +227,12 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 </div>
 
 <div class="flash" id="flash"></div>
+<div class="auto-banner" id="autoBanner">🤖 АКТИВНЫЙ РЕЖИМ: система принимает решения автономно</div>
+<div class="stopped-overlay" id="stoppedOverlay">
+  <div class="stopped-title">⛔ ОБОРУДОВАНИЕ ОСТАНОВЛЕНО</div>
+  <div style="font-size:11px;color:var(--dim);margin-bottom:10px">Автономная система обнаружила критический риск и остановила оборудование</div>
+  <button class="stopped-btn" onclick="operatorRestart()">▶ ПЕРЕЗАПУСТИТЬ ОБОРУДОВАНИЕ</button>
+</div>
 <div class="inc-modal" id="incModal">
   <div class="m-box">
     <div class="m-icon">⚠️</div>
@@ -217,6 +258,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
     </div>
   </div>
   <div class="hbtns">
+    <button class="btn btn-mode observe" id="modeBtn" onclick="toggleMode()">👁 НАБЛЮДЕНИЕ<span class="mode-badge" id="modeBadge" style="display:none">АВТО</span></button>
     <button class="btn btn-p" id="playBtn" onclick="togglePlay()">⏸ ПАУЗА</button>
     <button class="btn" onclick="doReset()">↺ СБРОС</button>
   </div>
@@ -364,7 +406,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
       <div id="recList"><div class="rec-item"><span>✅</span><span>Все параметры в норме.</span></div></div>
     </div>
     <div class="alerts">
-      <div class="a-head"><span class="a-title">📋 Журнал событий</span><span class="a-cnt" id="aCnt">0</span></div>
+      <div class="a-head"><span class="a-title">📋 Журнал событий</span><div style="display:flex;gap:6px;align-items:center"><span class="a-cnt" id="aCnt">0</span><button class="a-clear" onclick="clearAlerts()">ОЧИСТИТЬ</button></div></div>
       <div class="a-list" id="aList">
         <div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Подключение...</div></div>
       </div>
@@ -457,13 +499,17 @@ const riskChart = new Chart($('chartRisk').getContext('2d'), {
 // ═══ CHART TOGGLE & SCALE ═════════════════════
 function updateGridLayout() {
   const vis = Object.entries(chartVisible).filter(([,v])=>v).length;
-  const cols = vis <= 2 ? vis : vis === 3 ? 3 : 4;
-  D.chartsGrid.style.gridTemplateColumns = `repeat(${cols||1},1fr)`;
-  D.chartsGrid.style.gridTemplateRows = '1fr';
+  let cols, rows;
+  if      (vis <= 1) { cols=1; rows=1; }
+  else if (vis === 2) { cols=2; rows=1; }
+  else if (vis === 3) { cols=3; rows=1; }
+  else if (vis === 4) { cols=4; rows=1; }
+  else                { cols=3; rows=2; } // 5 charts: 3 top + 2 bottom
+  D.chartsGrid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+  D.chartsGrid.style.gridTemplateRows    = `repeat(${rows},1fr)`;
   Object.entries(chartVisible).forEach(([k,v])=>{
     $('cc-'+k).classList.toggle('hidden', !v);
   });
-  // Resize charts after layout changes
   setTimeout(()=>{ Object.values(charts).forEach(c=>c.resize()); riskChart.resize(); }, 60);
 }
 
@@ -536,16 +582,19 @@ function updateRecs(risk,d) {
   D.recList.innerHTML=r.map(([i,t])=>`<div class="rec-item"><span>${i}</span><span>${t}</span></div>`).join('');
 }
 
-function addAlert(type,msg) {
+function addAlert(type, msg, incidentData=null) {
   const now=new Date().toLocaleTimeString('ru-RU');
   const cls=type==='danger'?'a-danger':type==='warning'?'a-warn':'a-info';
   const bcls=type==='danger'?'bc':type==='warning'?'bw':'bi';
   const btxt=type==='danger'?'КРИТИЧНО':type==='warning'?'ВНИМАНИЕ':'INFO';
   const el=document.createElement('div');
   el.className='a-item '+cls;
-  el.innerHTML=`<div class="a-time">${now}</div><div class="a-msg"><span class="badge ${bcls}">${btxt}</span>${msg}</div>`;
+  const badgeHtml = incidentData
+    ? `<span class="badge ${bcls}" onclick="showIncidentDetail(event,${JSON.stringify(incidentData)})" title="Нажмите для деталей">${btxt} 🔍</span>`
+    : `<span class="badge ${bcls}">${btxt}</span>`;
+  el.innerHTML=`<div class="a-time">${now}</div><div class="a-msg">${badgeHtml}${msg}</div>`;
   D.aList.insertBefore(el,D.aList.firstChild);
-  while(D.aList.children.length>30)D.aList.removeChild(D.aList.lastChild);
+  while(D.aList.children.length>50)D.aList.removeChild(D.aList.lastChild);
   alertCnt++; D.aCnt.textContent=alertCnt; D.aCnt.classList.add('on');
 }
 
@@ -578,7 +627,9 @@ function onTick(d) {
       `T=${d.temperature.toFixed(1)}°C | V=${d.vibration.toFixed(2)} mm/s | P=${d.pressure.toFixed(1)} кПа<br>`+
       `<b>⚡ Немедленно остановите оборудование!</b>`;
     D.incModal.classList.add('on');
-    addAlert('danger',`Инцидент #${incCnt}: ${Math.round(d.risk*100)}% риск`);
+    const _d = d;
+    addAlert('danger',`Инцидент #${incCnt}: ${Math.round(d.risk*100)}% риск`, _d);
+    handleActiveMode(d.risk, d);
   } else if(d.risk>=0.3){
     warnCnt++; D.warn.textContent=warnCnt;
     D.status.textContent='ВНИМАНИЕ'; D.status.className='s-val warn';
@@ -597,8 +648,107 @@ function onTick(d) {
   charts.pres.update('none'); charts.load.update('none');
   charts.hum.update('none');
   riskChart.update('none');
+  if (!heightSynced) { syncChartsHeight(); heightSynced = true; }
 }
 
+
+function clearAlerts() {
+  D.aList.innerHTML='<div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Журнал очищен.</div></div>';
+  alertCnt=0; D.aCnt.textContent='0'; D.aCnt.classList.remove('on');
+}
+
+// ── Incident detail popup ──────────────────────
+let detailEl = null;
+function showIncidentDetail(evt, data) {
+  evt.stopPropagation();
+  if (detailEl) { detailEl.remove(); detailEl=null; return; }
+  detailEl = document.createElement('div');
+  detailEl.className = 'inc-detail';
+  detailEl.innerHTML = `
+    <div class="inc-detail-title">⚠ Инцидент — детали</div>
+    <div class="inc-detail-row"><span class="inc-detail-key">Риск</span><span class="inc-detail-val" style="color:var(--red)">${Math.round(data.risk*100)}%</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">🌡 Температура</span><span class="inc-detail-val">${data.temperature.toFixed(1)} °C</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">〜 Вибрация</span><span class="inc-detail-val">${data.vibration.toFixed(3)} mm/s</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">⬆ Давление</span><span class="inc-detail-val">${data.pressure.toFixed(1)} кПа</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">⚡ Нагрузка</span><span class="inc-detail-val">${data.load_factor.toFixed(3)} о.е.</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">💧 Влажность</span><span class="inc-detail-val">${data.humidity.toFixed(1)} %</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">T/P ratio</span><span class="inc-detail-val">${(data.temp_pressure_ratio||0).toFixed(4)}</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">V×L interact.</span><span class="inc-detail-val">${(data.vibration_load_interaction||0).toFixed(4)}</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">Точка</span><span class="inc-detail-val">#${data.index}</span></div>
+  `;
+  // Position near click
+  const x = Math.min(evt.clientX + 8, window.innerWidth - 240);
+  const y = Math.min(evt.clientY + 8, window.innerHeight - 300);
+  detailEl.style.left = x + 'px';
+  detailEl.style.top  = y + 'px';
+  document.body.appendChild(detailEl);
+  // Close on outside click
+  setTimeout(()=>document.addEventListener('click', ()=>{ if(detailEl){detailEl.remove();detailEl=null;} }, {once:true}), 10);
+}
+
+// ── Режимы работы ──────────────────────────────
+let mode = 'observe'; // 'observe' | 'active'
+let equipmentStopped = false;
+
+function toggleMode() {
+  mode = mode === 'observe' ? 'active' : 'observe';
+  const btn = $('modeBtn');
+  const badge = $('modeBadge');
+  if (mode === 'active') {
+    btn.className = 'btn btn-mode active-mode';
+    btn.innerHTML = '🤖 АКТИВНЫЙ<span class="mode-badge" id="modeBadge">АВТО</span>';
+    $('autoBanner').classList.add('on');
+    addAlert('info', 'Активный режим включён. Система будет автономно останавливать оборудование при риске ≥ 50%.');
+  } else {
+    btn.className = 'btn btn-mode observe';
+    btn.innerHTML = '👁 НАБЛЮДЕНИЕ<span class="mode-badge" id="modeBadge" style="display:none">АВТО</span>';
+    $('autoBanner').classList.remove('on');
+    // Resume if was stopped
+    if (equipmentStopped) {
+      equipmentStopped = false;
+      $('stoppedOverlay').classList.remove('on');
+    }
+    addAlert('info', 'Режим наблюдения. Система только отображает данные.');
+  }
+}
+
+function operatorRestart() {
+  equipmentStopped = false;
+  $('stoppedOverlay').classList.remove('on');
+  playing = true;
+  D.playBtn.textContent = '⏸ ПАУЗА'; D.playBtn.className = 'btn btn-p';
+  socket.emit('resume');
+  addAlert('info', '▶ Оператор перезапустил оборудование. Мониторинг возобновлён.');
+}
+
+function handleActiveMode(risk, d) {
+  if (mode !== 'active' || equipmentStopped) return;
+  if (risk >= 0.5) {
+    equipmentStopped = true;
+    playing = false;
+    socket.emit('pause');
+    D.playBtn.textContent = '⏸ СТОП'; D.playBtn.className = 'btn btn-d';
+    $('stoppedOverlay').classList.add('on');
+    addAlert('danger', `🤖 АВТОНОМНОЕ РЕШЕНИЕ: оборудование остановлено. Риск ${Math.round(risk*100)}% — T=${d.temperature.toFixed(1)}°C, V=${d.vibration.toFixed(2)}mm/s, P=${d.pressure.toFixed(1)}кПа`);
+  }
+}
+
+// ── Sync charts-wrap height to model-info bottom ───────────
+function syncChartsHeight() {
+  const modelInfo = document.querySelector('.model-info');
+  const chartsWrap = document.querySelector('.charts-wrap');
+  if (!modelInfo || !chartsWrap) return;
+  const modelBottom = modelInfo.getBoundingClientRect().bottom;
+  const chartsTop   = chartsWrap.getBoundingClientRect().top;
+  const available   = modelBottom - chartsTop - 8; // 8px breathing room
+  if (available > 60) {
+    chartsWrap.style.maxHeight = available + 'px';
+    chartsWrap.style.flex = 'none';
+    chartsWrap.style.height = available + 'px';
+  }
+}
+// Run once after first tick arrives (sidebar is populated)
+let heightSynced = false;
 // ═══ CONTROLS ═════════════════════════════════
 function togglePlay(){
   playing=!playing;
@@ -679,6 +829,7 @@ socket.on('reset_ok',data=>{
 
 // Init grid layout
 updateGridLayout();
+window.addEventListener('resize', ()=>{ syncChartsHeight(); updateGridLayout(); });
 </script>
 </body>
 </html>
