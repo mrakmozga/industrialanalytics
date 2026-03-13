@@ -23,23 +23,23 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* HEADER */
 header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;height:52px;background:linear-gradient(90deg,#061220,var(--panel),#061220);
+  padding:0 24px;height:60px;background:linear-gradient(90deg,#061220,var(--panel),#061220);
   border-bottom:1px solid var(--border);flex-shrink:0}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-icon{width:30px;height:30px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.logo-text{font-size:17px;font-weight:700;letter-spacing:3px;color:var(--accent)}
-.logo-sub{font-size:9px;color:var(--dim);letter-spacing:2px}
+.logo-icon{width:34px;height:34px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:20px;font-weight:700;letter-spacing:3px;color:var(--accent)}
+.logo-sub{font-size:10px;color:var(--dim);letter-spacing:2px}
 .hcenter{display:flex;align-items:center;gap:16px}
 .live{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);font-size:11px;color:var(--green)}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pg 1.4s infinite}
 @keyframes pg{0%,100%{opacity:1}50%{opacity:.5}}
-.htime{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--accent)}
+.htime{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--accent)}
 .spd{display:flex;align-items:center;gap:8px}
-.spd-lbl{font-size:10px;color:var(--dim);letter-spacing:1px}
-.spd-btn{padding:3px 10px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:4px;cursor:pointer;transition:.2s}
+.spd-lbl{font-size:11px;color:var(--dim);letter-spacing:1px}
+.spd-btn{padding:4px 12px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:13px;border-radius:4px;cursor:pointer;transition:.2s}
 .spd-btn.on,.spd-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
 .hbtns{display:flex;gap:8px}
-.btn{padding:5px 14px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;border-radius:5px;cursor:pointer;transition:.2s}
+.btn{padding:6px 16px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;border-radius:5px;cursor:pointer;transition:.2s}
 .btn:hover,.btn.on{border-color:var(--accent);color:var(--accent)}
 .btn-p{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
 .btn-d{background:rgba(255,34,68,.1);border-color:var(--red);color:var(--red)}
@@ -48,13 +48,11 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .btn-mode.active-mode{border-color:var(--orange);color:var(--orange);background:rgba(255,136,0,.1)}
 .mode-badge{position:absolute;top:-1px;right:-1px;font-size:7px;font-weight:700;letter-spacing:1px;
   padding:2px 4px;border-radius:0 4px 0 4px;background:var(--orange);color:#000;text-transform:uppercase}
-/* Autonomous action banner */
-.auto-banner{display:none;position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:900;
-  background:rgba(255,136,0,.15);border:1px solid var(--orange);border-radius:8px;
-  padding:8px 20px;font-size:12px;color:var(--orange);letter-spacing:1px;text-align:center;
-  backdrop-filter:blur(4px)}
-.auto-banner.on{display:block;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;top:56px}to{opacity:1;top:62px}}
+/* Autonomous action banner — inline in header, no overlap */
+.auto-banner{display:none;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;
+  background:rgba(255,136,0,.12);border:1px solid rgba(255,136,0,.4);
+  font-size:10px;color:var(--orange);letter-spacing:1px;white-space:nowrap}
+.auto-banner.on{display:flex}
 /* Equipment stopped state */
 .stopped-overlay{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:900;
   background:rgba(255,34,68,.12);border:1px solid var(--red);border-radius:10px;
@@ -68,9 +66,9 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 /* MAIN */
 .main{position:relative;z-index:1;display:grid;
-  grid-template-columns:240px 1fr 280px;
+  grid-template-columns:260px 1fr 300px;
   grid-template-rows:180px 1fr;
-  height:calc(100vh - 52px);padding:10px;gap:9px;overflow:hidden}
+  height:calc(100vh - 60px);padding:10px;gap:9px;overflow:hidden}
 
 /* LEFT SIDEBAR */
 .sidebar{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
@@ -83,19 +81,19 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .g-card.warn{border-color:var(--yellow)}
 .g-card.danger{border-color:var(--red);box-shadow:0 0 10px rgba(255,34,68,.2)}
 .g-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.g-name{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
-.g-val{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--accent);transition:color .3s}
+.g-name{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+.g-val{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--accent);transition:color .3s}
 .g-val.warn{color:var(--yellow)}.g-val.danger{color:var(--red)}
 .g-unit{font-size:9px;color:var(--dim)}
 .g-track{height:4px;border-radius:2px;background:rgba(255,255,255,.05);overflow:hidden}
 .g-fill{height:100%;border-radius:2px;transition:width .4s,background .3s;background:linear-gradient(90deg,var(--accent2),var(--accent))}
 .g-fill.warn{background:linear-gradient(90deg,#cc8800,var(--yellow))}
 .g-fill.danger{background:linear-gradient(90deg,#cc0022,var(--red))}
-.g-mm{display:flex;justify-content:space-between;font-size:8px;color:var(--dim);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.g-mm{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:2px;font-family:'Share Tech Mono',monospace}
 
 /* Chart toggle buttons in sidebar */
 .chart-toggles{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;flex-shrink:0}
-.ct-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.ct-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
 .ct-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:6px}
 .ct-row:last-child{border-bottom:none}
 .ct-toggle{position:relative;width:32px;height:16px;flex-shrink:0}
@@ -104,7 +102,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .ct-slider::before{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;border-radius:50%;background:var(--dim);transition:.3s}
 .ct-toggle input:checked+.ct-slider{background:rgba(0,212,255,.25)}
 .ct-toggle input:checked+.ct-slider::before{background:var(--accent);transform:translateX(16px)}
-.ct-name{font-size:11px;color:var(--text);flex:1}
+.ct-name{font-size:12px;color:var(--text);flex:1}
 .ct-scale{display:flex;align-items:center;gap:4px}
 .ct-scale-btn{width:18px;height:18px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
 .ct-scale-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -112,7 +110,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 /* Derived features */
 .model-info{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;flex-shrink:0}
-.m-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.m-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
 .m-row:last-child{border-bottom:none}
 .m-key{color:var(--dim)}.m-val{font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:10px}
 
@@ -122,16 +120,16 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 /* Stats bar */
 .stats{display:flex;gap:8px;flex-shrink:0}
 .s-card{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
-.s-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
-.s-val{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--accent)}
+.s-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+.s-val{font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--accent)}
 .s-val.ok{color:var(--green)}.s-val.warn{color:var(--yellow)}.s-val.crit{color:var(--red)}
-.s-sub{font-size:9px;color:var(--dim)}
+.s-sub{font-size:10px;color:var(--dim)}
 
 /* Risk timeline — top, big */
-.risk-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;
-  display:flex;flex-direction:column;flex-shrink:0;height:160px}
+.risk-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;
+  display:flex;flex-direction:column;flex-shrink:0;height:175px}
 .rp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-shrink:0}
-.rp-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.rp-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
 .prog{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--dim)}
 .prog-track{width:110px;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s}
@@ -143,25 +141,25 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 /* cols/rows managed by JS */
 .chart-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .chart-card.hidden{display:none}
-.c-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;flex-shrink:0}
+.c-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:5px;flex-shrink:0}
 .chart-card canvas{flex:1;min-height:0;display:block}
 
 /* RIGHT */
 .right{grid-column:3;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
 .ai-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;flex-shrink:0}
-.ai-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
-.risk-circ{width:120px;height:120px;margin:0 auto 8px;position:relative}
+.ai-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.risk-circ{width:136px;height:136px;margin:0 auto 8px;position:relative}
 .risk-circ svg{transform:rotate(-90deg)}
 .rc-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:8}
 .rc-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:295;stroke-dashoffset:295;
   transition:stroke-dashoffset .5s,stroke .4s;stroke:var(--green)}
-.rc-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Share Tech Mono',monospace;font-size:26px;color:var(--green);transition:color .4s}
-.risk-lbl{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);transition:color .4s;margin-bottom:2px}
+.rc-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Share Tech Mono',monospace;font-size:28px;color:var(--green);transition:color .4s}
+.risk-lbl{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);transition:color .4s;margin-bottom:2px}
 .risk-sub{font-size:9px;color:var(--dim)}
 
 .rec-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;flex-shrink:0}
 .rec-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
-.rec-item{display:flex;gap:7px;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.rec-item{display:flex;gap:7px;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .rec-item:last-child{border-bottom:none}
 
 .alerts{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;min-height:0}
@@ -174,14 +172,14 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .a-list{flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:4px}
 .a-list::-webkit-scrollbar{width:3px}
 .a-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.a-item{padding:6px 9px;border-radius:6px;border-left:3px solid;font-size:10px;animation:si .3s ease}
+.a-item{padding:7px 10px;border-radius:6px;border-left:3px solid;font-size:11px;animation:si .3s ease}
 @keyframes si{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
 .a-info{border-color:var(--accent2);background:rgba(0,136,204,.1)}
 .a-warn{border-color:var(--yellow);background:rgba(255,204,0,.08)}
 .a-danger{border-color:var(--red);background:rgba(255,34,68,.1)}
-.a-time{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);margin-bottom:2px}
+.a-time{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);margin-bottom:2px}
 .a-msg{color:var(--text);line-height:1.4}
-.badge{display:inline-block;font-size:8px;font-weight:700;letter-spacing:1px;padding:1px 5px;border-radius:3px;margin-right:3px;text-transform:uppercase}
+.badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;padding:1px 5px;border-radius:3px;margin-right:3px;text-transform:uppercase}
 .bi{background:rgba(0,136,204,.3);color:var(--accent)}
 .bw{background:rgba(255,204,0,.2);color:var(--yellow)}
 .bc{background:rgba(255,34,68,.25);color:var(--red)}
@@ -227,7 +225,6 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 </div>
 
 <div class="flash" id="flash"></div>
-<div class="auto-banner" id="autoBanner">🤖 АКТИВНЫЙ РЕЖИМ: система принимает решения автономно</div>
 <div class="stopped-overlay" id="stoppedOverlay">
   <div class="stopped-title">⛔ ОБОРУДОВАНИЕ ОСТАНОВЛЕНО</div>
   <div style="font-size:11px;color:var(--dim);margin-bottom:10px">Автономная система обнаружила критический риск и остановила оборудование</div>
@@ -250,6 +247,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
   <div class="hcenter">
     <div class="live"><div class="live-dot"></div>ONLINE</div>
     <div class="htime" id="clk">--:--:--</div>
+    <div class="auto-banner" id="autoBanner"><span>⚡</span><span>АКТИВНЫЙ РЕЖИМ</span></div>
     <div class="spd">
       <span class="spd-lbl">СКОРОСТЬ:</span>
       <button class="spd-btn on" onclick="setSpd(1,this)">1×</button>
@@ -361,6 +359,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
       <div class="s-card"><div class="s-lbl">Инцидентов</div><div class="s-val crit" id="st-inc">0</div><div class="s-sub">обнаружено моделью</div></div>
       <div class="s-card"><div class="s-lbl">Предупреждений</div><div class="s-val warn" id="st-warn">0</div><div class="s-sub">риск &gt; 30%</div></div>
       <div class="s-card"><div class="s-lbl">Статус системы</div><div class="s-val ok" id="st-status">НОРМА</div><div class="s-sub">Random Forest v1.0</div></div>
+      <div class="s-card"><div class="s-lbl">Время работы</div><div class="s-val" id="st-uptime" style="font-size:15px;color:var(--accent)">00:00:00</div><div class="s-sub">с начала сессии</div></div>
     </div>
 
     <!-- Risk timeline — СВЕРХУ -->
@@ -392,7 +391,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
     <div class="ai-panel">
       <div class="ai-title">🤖 ИИ · Риск отказа</div>
       <div class="risk-circ">
-        <svg width="120" height="120" viewBox="0 0 120 120">
+        <svg width="136" height="136" viewBox="0 0 120 120">
           <circle class="rc-bg"   cx="60" cy="60" r="47"/>
           <circle class="rc-fill" id="riskArc" cx="60" cy="60" r="47"/>
         </svg>
@@ -433,7 +432,7 @@ const D = {
   progTxt:$('progTxt'), progFill:$('progFill'),
   riskArc:$('riskArc'), rPct:$('rPct'), rLbl:$('rLbl'), rSub:$('rSub'),
   tpr:$('feat-tpr'), vli:$('feat-vli'),
-  recList:$('recList'), aList:$('aList'), aCnt:$('aCnt'),
+  recList:$('recList'), aList:$('aList'), aCnt:$('aCnt'), uptime:$('st-uptime'),
   chartsGrid:$('chartsGrid'),
 };
 
@@ -589,9 +588,14 @@ function addAlert(type, msg, incidentData=null) {
   const btxt=type==='danger'?'КРИТИЧНО':type==='warning'?'ВНИМАНИЕ':'INFO';
   const el=document.createElement('div');
   el.className='a-item '+cls;
-  const badgeHtml = incidentData
-    ? `<span class="badge ${bcls}" onclick="showIncidentDetail(event,${JSON.stringify(incidentData)})" title="Нажмите для деталей">${btxt} 🔍</span>`
-    : `<span class="badge ${bcls}">${btxt}</span>`;
+  let badgeHtml;
+  if (incidentData) {
+    const uid = 'inc_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    incidentStore.set(uid, incidentData);
+    badgeHtml = `<span class="badge ${bcls}" data-inc="${uid}" onclick="showIncidentDetail(event,this.dataset.inc)" title="Нажмите для деталей">${btxt} 🔍</span>`;
+  } else {
+    badgeHtml = `<span class="badge ${bcls}">${btxt}</span>`;
+  }
   el.innerHTML=`<div class="a-time">${now}</div><div class="a-msg">${badgeHtml}${msg}</div>`;
   D.aList.insertBefore(el,D.aList.firstChild);
   while(D.aList.children.length>50)D.aList.removeChild(D.aList.lastChild);
@@ -658,10 +662,13 @@ function clearAlerts() {
 }
 
 // ── Incident detail popup ──────────────────────
+const incidentStore = new Map();
 let detailEl = null;
-function showIncidentDetail(evt, data) {
+function showIncidentDetail(evt, uid) {
   evt.stopPropagation();
-  if (detailEl) { detailEl.remove(); detailEl=null; return; }
+  if (detailEl) { detailEl.remove(); detailEl=null; }
+  const data = incidentStore.get(uid);
+  if (!data) return;
   detailEl = document.createElement('div');
   detailEl.className = 'inc-detail';
   detailEl.innerHTML = `
@@ -674,16 +681,14 @@ function showIncidentDetail(evt, data) {
     <div class="inc-detail-row"><span class="inc-detail-key">💧 Влажность</span><span class="inc-detail-val">${data.humidity.toFixed(1)} %</span></div>
     <div class="inc-detail-row"><span class="inc-detail-key">T/P ratio</span><span class="inc-detail-val">${(data.temp_pressure_ratio||0).toFixed(4)}</span></div>
     <div class="inc-detail-row"><span class="inc-detail-key">V×L interact.</span><span class="inc-detail-val">${(data.vibration_load_interaction||0).toFixed(4)}</span></div>
-    <div class="inc-detail-row"><span class="inc-detail-key">Точка</span><span class="inc-detail-val">#${data.index}</span></div>
+    <div class="inc-detail-row"><span class="inc-detail-key">Точка датасета</span><span class="inc-detail-val">#${data.index}</span></div>
   `;
-  // Position near click
-  const x = Math.min(evt.clientX + 8, window.innerWidth - 240);
-  const y = Math.min(evt.clientY + 8, window.innerHeight - 300);
+  const x = Math.min(evt.clientX + 10, window.innerWidth - 250);
+  const y = Math.min(evt.clientY + 10, window.innerHeight - 310);
   detailEl.style.left = x + 'px';
   detailEl.style.top  = y + 'px';
   document.body.appendChild(detailEl);
-  // Close on outside click
-  setTimeout(()=>document.addEventListener('click', ()=>{ if(detailEl){detailEl.remove();detailEl=null;} }, {once:true}), 10);
+  setTimeout(()=>document.addEventListener('click', ()=>{ if(detailEl){detailEl.remove();detailEl=null;} }, {once:true}), 50);
 }
 
 // ── Режимы работы ──────────────────────────────
@@ -773,8 +778,17 @@ function doReset(){
   setTimeout(()=>socket.emit('start_after_reset'),100);
 }
 
-// Clock
-setInterval(()=>{D.clk.textContent=new Date().toLocaleTimeString('ru-RU');},1000);
+// Clock + uptime
+const _startTime = Date.now();
+function fmtUptime(ms) {
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+setInterval(()=>{
+  D.clk.textContent = new Date().toLocaleTimeString('ru-RU');
+  D.uptime.textContent = fmtUptime(Date.now() - _startTime);
+}, 1000);
 
 // ═══ WEBSOCKET ════════════════════════════════
 const socket=io(window.location.origin, {
