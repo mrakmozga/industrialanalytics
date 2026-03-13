@@ -1,0 +1,12 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      # Кладёте CSV-файлы в папку ./data рядом с docker-compose.yml
+      - ./data:/app/data:ro
+    environment:
+      - DATA_CSV=data/equipment_simulation_with_anomalies_25000.csv
+      - PREDICTIONS_CSV=data/predictions.csv

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndustrAI — Мониторинг</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d1a; --panel:#0b1628; --panel2:#0e1e35; --border:#1a3a5c;
+  --accent:#00d4ff; --accent2:#0088cc; --green:#00ff88;
+  --yellow:#ffcc00; --orange:#ff8800; --red:#ff2244;
+  --text:#c8dff0; --dim:#4a7a9b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;height:100vh;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,100,180,.15) 0%,transparent 60%),
+  repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,212,255,.015) 40px,rgba(0,212,255,.015) 41px),
+  repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,212,255,.015) 40px,rgba(0,212,255,.015) 41px)}
+
+/* HEADER */
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;background:linear-gradient(90deg,#061220,var(--panel),#061220);
+  border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:30px;height:30px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.logo-text{font-size:17px;font-weight:700;letter-spacing:3px;color:var(--accent)}
+.logo-sub{font-size:9px;color:var(--dim);letter-spacing:2px}
+.hcenter{display:flex;align-items:center;gap:16px}
+.live{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);font-size:11px;color:var(--green)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pg 1.4s infinite}
+@keyframes pg{0%,100%{opacity:1}50%{opacity:.5}}
+.htime{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--accent)}
+.spd{display:flex;align-items:center;gap:8px}
+.spd-lbl{font-size:10px;color:var(--dim);letter-spacing:1px}
+.spd-btn{padding:3px 10px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:4px;cursor:pointer;transition:.2s}
+.spd-btn.on,.spd-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.1)}
+.hbtns{display:flex;gap:8px}
+.btn{padding:5px 14px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;border-radius:5px;cursor:pointer;transition:.2s}
+.btn:hover,.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn-p{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent)}
+.btn-d{background:rgba(255,34,68,.1);border-color:var(--red);color:var(--red)}
+
+/* MAIN */
+.main{position:relative;z-index:1;display:grid;
+  grid-template-columns:240px 1fr 280px;
+  grid-template-rows:180px 1fr;
+  height:calc(100vh - 52px);padding:10px;gap:9px;overflow:hidden}
+
+/* LEFT SIDEBAR */
+.sidebar{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow-y:auto;overflow-x:hidden}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sec-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);padding:2px 0;flex-shrink:0}
+
+/* Gauge card */
+.g-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:border-color .3s,box-shadow .3s;flex-shrink:0}
+.g-card.warn{border-color:var(--yellow)}
+.g-card.danger{border-color:var(--red);box-shadow:0 0 10px rgba(255,34,68,.2)}
+.g-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.g-name{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+.g-val{font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--accent);transition:color .3s}
+.g-val.warn{color:var(--yellow)}.g-val.danger{color:var(--red)}
+.g-unit{font-size:9px;color:var(--dim)}
+.g-track{height:4px;border-radius:2px;background:rgba(255,255,255,.05);overflow:hidden}
+.g-fill{height:100%;border-radius:2px;transition:width .4s,background .3s;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+.g-fill.warn{background:linear-gradient(90deg,#cc8800,var(--yellow))}
+.g-fill.danger{background:linear-gradient(90deg,#cc0022,var(--red))}
+.g-mm{display:flex;justify-content:space-between;font-size:8px;color:var(--dim);margin-top:2px;font-family:'Share Tech Mono',monospace}
+
+/* Chart toggle buttons in sidebar */
+.chart-toggles{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;flex-shrink:0}
+.ct-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.ct-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:6px}
+.ct-row:last-child{border-bottom:none}
+.ct-toggle{position:relative;width:32px;height:16px;flex-shrink:0}
+.ct-toggle input{opacity:0;width:0;height:0}
+.ct-slider{position:absolute;inset:0;border-radius:8px;background:rgba(255,255,255,.1);cursor:pointer;transition:.3s}
+.ct-slider::before{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;border-radius:50%;background:var(--dim);transition:.3s}
+.ct-toggle input:checked+.ct-slider{background:rgba(0,212,255,.25)}
+.ct-toggle input:checked+.ct-slider::before{background:var(--accent);transform:translateX(16px)}
+.ct-name{font-size:11px;color:var(--text);flex:1}
+.ct-scale{display:flex;align-items:center;gap:4px}
+.ct-scale-btn{width:18px;height:18px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.ct-scale-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ct-scale-val{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--accent);width:28px;text-align:center}
+
+/* Derived features */
+.model-info{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;flex-shrink:0}
+.m-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.m-row:last-child{border-bottom:none}
+.m-key{color:var(--dim)}.m-val{font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:10px}
+
+/* CENTER */
+.center{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+
+/* Stats bar */
+.stats{display:flex;gap:8px;flex-shrink:0}
+.s-card{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
+.s-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+.s-val{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--accent)}
+.s-val.ok{color:var(--green)}.s-val.warn{color:var(--yellow)}.s-val.crit{color:var(--red)}
+.s-sub{font-size:9px;color:var(--dim)}
+
+/* Risk timeline — top, big */
+.risk-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;
+  display:flex;flex-direction:column;flex-shrink:0;height:160px}
+.rp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-shrink:0}
+.rp-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.prog{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--dim)}
+.prog-track{width:110px;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s}
+.risk-panel canvas{flex:1;min-height:0;display:block}
+
+/* Mini charts grid — below risk timeline */
+.charts-wrap{flex:1;min-height:0;overflow:hidden}
+.charts-grid{display:grid;gap:8px;height:100%}
+/* default 4-col; JS adjusts based on visible count */
+.chart-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.chart-card.hidden{display:none}
+.c-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:4px;flex-shrink:0}
+.chart-card canvas{flex:1;min-height:0;display:block}
+
+/* RIGHT */
+.right{grid-column:3;grid-row:1/3;display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
+.ai-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;flex-shrink:0}
+.ai-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.risk-circ{width:120px;height:120px;margin:0 auto 8px;position:relative}
+.risk-circ svg{transform:rotate(-90deg)}
+.rc-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:8}
+.rc-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:295;stroke-dashoffset:295;
+  transition:stroke-dashoffset .5s,stroke .4s;stroke:var(--green)}
+.rc-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Share Tech Mono',monospace;font-size:26px;color:var(--green);transition:color .4s}
+.risk-lbl{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);transition:color .4s;margin-bottom:2px}
+.risk-sub{font-size:9px;color:var(--dim)}
+
+.rec-panel{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;flex-shrink:0}
+.rec-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.rec-item{display:flex;gap:7px;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.rec-item:last-child{border-bottom:none}
+
+.alerts{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;min-height:0}
+.a-head{padding:7px 11px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.a-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.a-cnt{font-size:10px;font-weight:700;background:rgba(255,34,68,.2);color:var(--red);padding:1px 6px;border-radius:8px;display:none}
+.a-cnt.on{display:block}
+.a-list{flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:4px}
+.a-list::-webkit-scrollbar{width:3px}
+.a-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.a-item{padding:6px 9px;border-radius:6px;border-left:3px solid;font-size:10px;animation:si .3s ease}
+@keyframes si{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+.a-info{border-color:var(--accent2);background:rgba(0,136,204,.1)}
+.a-warn{border-color:var(--yellow);background:rgba(255,204,0,.08)}
+.a-danger{border-color:var(--red);background:rgba(255,34,68,.1)}
+.a-time{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);margin-bottom:2px}
+.a-msg{color:var(--text);line-height:1.4}
+.badge{display:inline-block;font-size:8px;font-weight:700;letter-spacing:1px;padding:1px 5px;border-radius:3px;margin-right:3px;text-transform:uppercase}
+.bi{background:rgba(0,136,204,.3);color:var(--accent)}
+.bw{background:rgba(255,204,0,.2);color:var(--yellow)}
+.bc{background:rgba(255,34,68,.25);color:var(--red)}
+
+/* Overlays */
+.flash{position:fixed;inset:0;z-index:999;pointer-events:none;background:rgba(255,34,68,0)}
+.flash.on{animation:fr .6s ease-out}
+@keyframes fr{0%{background:rgba(255,34,68,.35)}100%{background:rgba(255,34,68,0)}}
+.inc-modal{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.7)}
+.inc-modal.on{display:flex}
+.m-box{background:var(--panel2);border:1px solid var(--red);border-radius:12px;padding:24px 28px;max-width:400px;text-align:center;box-shadow:0 0 50px rgba(255,34,68,.3)}
+.m-icon{font-size:36px;margin-bottom:8px}.m-title{font-size:18px;font-weight:700;letter-spacing:3px;color:var(--red);margin-bottom:10px}
+.m-body{font-size:12px;line-height:1.7;margin-bottom:16px}
+.m-close{padding:7px 24px;background:rgba(255,34,68,.2);border:1px solid var(--red);color:var(--red);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;border-radius:6px;cursor:pointer}
+
+#overlay{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.ov-icon{font-size:44px}.ov-title{font-size:20px;font-weight:700;letter-spacing:4px;color:var(--accent)}
+.ov-sub{font-size:11px;letter-spacing:2px;color:var(--dim)}
+.ov-spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin-top:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ov-err{color:var(--red);font-size:12px;display:none}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="ov-icon">⚙</div>
+  <div class="ov-title">IndustrAI</div>
+  <div class="ov-sub">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ...</div>
+  <div class="ov-spin"></div>
+  <div class="ov-err" id="ovErr">Не удалось подключиться. Проверьте что app.py запущен.</div>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="inc-modal" id="incModal">
+  <div class="m-box">
+    <div class="m-icon">⚠️</div>
+    <div class="m-title">КРИТИЧЕСКИЙ ИНЦИДЕНТ</div>
+    <div class="m-body" id="mBody">Обнаружена высокая вероятность отказа.</div>
+    <button class="m-close" onclick="document.getElementById('incModal').classList.remove('on')">ПОДТВЕРДИТЬ</button>
+  </div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚙</div>
+    <div><div class="logo-text">IndustrAI</div><div class="logo-sub">ПРОМЫШЛЕННАЯ АНАЛИТИКА v3.0</div></div>
+  </div>
+  <div class="hcenter">
+    <div class="live"><div class="live-dot"></div>ONLINE</div>
+    <div class="htime" id="clk">--:--:--</div>
+    <div class="spd">
+      <span class="spd-lbl">СКОРОСТЬ:</span>
+      <button class="spd-btn on" onclick="setSpd(1,this)">1×</button>
+      <button class="spd-btn"   onclick="setSpd(2,this)">2×</button>
+      <button class="spd-btn"   onclick="setSpd(5,this)">5×</button>
+    </div>
+  </div>
+  <div class="hbtns">
+    <button class="btn btn-p" id="playBtn" onclick="togglePlay()">⏸ ПАУЗА</button>
+    <button class="btn" onclick="doReset()">↺ СБРОС</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sec-label">Сенсоры оборудования</div>
+
+    <div class="g-card" id="gc-temp">
+      <div class="g-head"><span class="g-name">🌡 Температура</span><span class="g-val" id="gv-temp">--<span class="g-unit">°C</span></span></div>
+      <div class="g-track"><div class="g-fill" id="gb-temp" style="width:0%"></div></div>
+      <div class="g-mm"><span>50</span><span>норма 60–80°C</span><span>110</span></div>
+    </div>
+    <div class="g-card" id="gc-vibr">
+      <div class="g-head"><span class="g-name">〜 Вибрация</span><span class="g-val" id="gv-vibr">--<span class="g-unit">mm/s</span></span></div>
+      <div class="g-track"><div class="g-fill" id="gb-vibr" style="width:0%"></div></div>
+      <div class="g-mm"><span>0</span><span>норма 2–5 mm/s</span><span>10</span></div>
+    </div>
+    <div class="g-card" id="gc-pres">
+      <div class="g-head"><span class="g-name">⬆ Давление</span><span class="g-val" id="gv-pres">--<span class="g-unit">кПа</span></span></div>
+      <div class="g-track"><div class="g-fill" id="gb-pres" style="width:0%"></div></div>
+      <div class="g-mm"><span>60</span><span>норма 85–105 кПа</span><span>118</span></div>
+    </div>
+    <div class="g-card" id="gc-load">
+      <div class="g-head"><span class="g-name">⚡ Нагрузка</span><span class="g-val" id="gv-load">--<span class="g-unit">о.е.</span></span></div>
+      <div class="g-track"><div class="g-fill" id="gb-load" style="width:0%"></div></div>
+      <div class="g-mm"><span>0.4</span><span>норма 0.55–0.85</span><span>1.1</span></div>
+    </div>
+    <div class="g-card" id="gc-hum">
+      <div class="g-head"><span class="g-name">💧 Влажность</span><span class="g-val" id="gv-hum">--<span class="g-unit">%</span></span></div>
+      <div class="g-track"><div class="g-fill" id="gb-hum" style="width:0%"></div></div>
+      <div class="g-mm"><span>7</span><span>норма 30–60%</span><span>87</span></div>
+    </div>
+
+    <!-- Chart toggles -->
+    <div class="chart-toggles">
+      <div class="ct-title">Графики показателей</div>
+      <div class="ct-row">
+        <label class="ct-toggle"><input type="checkbox" id="tog-temp" checked onchange="toggleChart('temp',this.checked)"><span class="ct-slider"></span></label>
+        <span class="ct-name">🌡 Температура</span>
+        <div class="ct-scale">
+          <button class="ct-scale-btn" onclick="adjustScale('temp',-1)">−</button>
+          <span class="ct-scale-val" id="sc-temp">auto</span>
+          <button class="ct-scale-btn" onclick="adjustScale('temp',1)">+</button>
+        </div>
+      </div>
+      <div class="ct-row">
+        <label class="ct-toggle"><input type="checkbox" id="tog-vibr" checked onchange="toggleChart('vibr',this.checked)"><span class="ct-slider"></span></label>
+        <span class="ct-name">〜 Вибрация</span>
+        <div class="ct-scale">
+          <button class="ct-scale-btn" onclick="adjustScale('vibr',-1)">−</button>
+          <span class="ct-scale-val" id="sc-vibr">auto</span>
+          <button class="ct-scale-btn" onclick="adjustScale('vibr',1)">+</button>
+        </div>
+      </div>
+      <div class="ct-row">
+        <label class="ct-toggle"><input type="checkbox" id="tog-pres" checked onchange="toggleChart('pres',this.checked)"><span class="ct-slider"></span></label>
+        <span class="ct-name">⬆ Давление</span>
+        <div class="ct-scale">
+          <button class="ct-scale-btn" onclick="adjustScale('pres',-1)">−</button>
+          <span class="ct-scale-val" id="sc-pres">auto</span>
+          <button class="ct-scale-btn" onclick="adjustScale('pres',1)">+</button>
+        </div>
+      </div>
+      <div class="ct-row">
+        <label class="ct-toggle"><input type="checkbox" id="tog-load" checked onchange="toggleChart('load',this.checked)"><span class="ct-slider"></span></label>
+        <span class="ct-name">⚡ Нагрузка</span>
+        <div class="ct-scale">
+          <button class="ct-scale-btn" onclick="adjustScale('load',-1)">−</button>
+          <span class="ct-scale-val" id="sc-load">auto</span>
+          <button class="ct-scale-btn" onclick="adjustScale('load',1)">+</button>
+        </div>
+      </div>
+      <div class="ct-row">
+        <label class="ct-toggle"><input type="checkbox" id="tog-hum" onchange="toggleChart('hum',this.checked)"><span class="ct-slider"></span></label>
+        <span class="ct-name">💧 Влажность</span>
+        <div class="ct-scale">
+          <button class="ct-scale-btn" onclick="adjustScale('hum',-1)">−</button>
+          <span class="ct-scale-val" id="sc-hum">auto</span>
+          <button class="ct-scale-btn" onclick="adjustScale('hum',1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="model-info">
+      <div class="sec-label" style="margin-bottom:5px">Производные признаки</div>
+      <div class="m-row"><span class="m-key">T/P ratio</span><span class="m-val" id="feat-tpr">—</span></div>
+      <div class="m-row"><span class="m-key">V×L interact.</span><span class="m-val" id="feat-vli">—</span></div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="s-card"><div class="s-lbl">Точек обработано</div><div class="s-val" id="st-proc">0</div><div class="s-sub" id="st-total-sub" style="visibility:hidden">—</div></div>
+      <div class="s-card"><div class="s-lbl">Инцидентов</div><div class="s-val crit" id="st-inc">0</div><div class="s-sub">обнаружено моделью</div></div>
+      <div class="s-card"><div class="s-lbl">Предупреждений</div><div class="s-val warn" id="st-warn">0</div><div class="s-sub">риск &gt; 30%</div></div>
+      <div class="s-card"><div class="s-lbl">Статус системы</div><div class="s-val ok" id="st-status">НОРМА</div><div class="s-sub">Random Forest v1.0</div></div>
+    </div>
+
+    <!-- Risk timeline — СВЕРХУ -->
+    <div class="risk-panel">
+      <div class="rp-head">
+        <span class="rp-title">📈 Временной ряд вероятности отказа (Random Forest)</span>
+        <div class="prog">
+          <span id="progTxt">0 / —</span>
+          <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <canvas id="chartRisk"></canvas>
+    </div>
+
+    <!-- Mini charts -->
+    <div class="charts-wrap">
+      <div class="charts-grid" id="chartsGrid">
+        <div class="chart-card" id="cc-temp"><div class="c-label">🌡 Температура °C</div><canvas id="chartTemp"></canvas></div>
+        <div class="chart-card" id="cc-vibr"><div class="c-label">〜 Вибрация mm/s</div><canvas id="chartVibr"></canvas></div>
+        <div class="chart-card" id="cc-pres"><div class="c-label">⬆ Давление кПа</div><canvas id="chartPres"></canvas></div>
+        <div class="chart-card" id="cc-load"><div class="c-label">⚡ Нагрузка о.е.</div><canvas id="chartLoad"></canvas></div>
+        <div class="chart-card hidden" id="cc-hum"><div class="c-label">💧 Влажность %</div><canvas id="chartHum"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="ai-panel">
+      <div class="ai-title">🤖 ИИ · Риск отказа</div>
+      <div class="risk-circ">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="rc-bg"   cx="60" cy="60" r="47"/>
+          <circle class="rc-fill" id="riskArc" cx="60" cy="60" r="47"/>
+        </svg>
+        <div class="rc-pct" id="rPct">0%</div>
+      </div>
+      <div class="risk-lbl" id="rLbl">НОРМА</div>
+      <div class="risk-sub" id="rSub">Вероятность инцидента: 0%</div>
+    </div>
+    <div class="rec-panel">
+      <div class="rec-title">Рекомендации ИИ</div>
+      <div id="recList"><div class="rec-item"><span>✅</span><span>Все параметры в норме.</span></div></div>
+    </div>
+    <div class="alerts">
+      <div class="a-head"><span class="a-title">📋 Журнал событий</span><span class="a-cnt" id="aCnt">0</span></div>
+      <div class="a-list" id="aList">
+        <div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Подключение...</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══ CONSTANTS ════════════════════════════════
+const TOTAL  = {{ total_rows }};
+const S_MEAN  = {{ scaler_mean }};
+const S_SCALE = {{ scaler_scale }};
+const WIN    = 100;
+const CIRC   = 2 * Math.PI * 47;  // r=47
+
+// ═══ DOM ══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const D = {
+  overlay:$('overlay'), ovErr:$('ovErr'),
+  clk:$('clk'), flash:$('flash'), incModal:$('incModal'), mBody:$('mBody'),
+  playBtn:$('playBtn'),
+  proc:$('st-proc'), inc:$('st-inc'), warn:$('st-warn'), status:$('st-status'),
+  progTxt:$('progTxt'), progFill:$('progFill'),
+  riskArc:$('riskArc'), rPct:$('rPct'), rLbl:$('rLbl'), rSub:$('rSub'),
+  tpr:$('feat-tpr'), vli:$('feat-vli'),
+  recList:$('recList'), aList:$('aList'), aCnt:$('aCnt'),
+  chartsGrid:$('chartsGrid'),
+};
+
+// ═══ STATE ════════════════════════════════════
+let playing=true, incCnt=0, warnCnt=0, alertCnt=0, totalRows=0;
+const labels=[],tempD=[],vibrD=[],presD=[],loadD=[],humD=[],riskD=[],thrD=[];
+
+// Scale levels per chart (index into scaleSteps)
+const scaleSteps = [null, 0.5, 1, 2, 5, 10, 20, 50, 100, 200];
+// null = auto; others = ±N from center of data range
+const scaleIdx = {temp:0, vibr:0, pres:0, load:0, hum:0};
+const chartVisible = {temp:true, vibr:true, pres:true, load:true, hum:false};
+
+// Chart default y-ranges
+const yRanges = {
+  temp:{min:50,max:115}, vibr:{min:0,max:11}, pres:{min:55,max:125}, load:{min:0.35,max:1.15}, hum:{min:5,max:90}
+};
+
+// ═══ CHARTS ═══════════════════════════════════
+function makeChart(cid, color, dataArr, yMin, yMax) {
+  return new Chart($(cid).getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets:[{ data:dataArr, borderColor:color, borderWidth:1.5,
+      pointRadius:0, tension:0.3, fill:true,
+      backgroundColor: c2 => { const g=c2.chart.ctx.createLinearGradient(0,0,0,c2.chart.height);
+        g.addColorStop(0,color+'30'); g.addColorStop(1,color+'00'); return g; }
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0},
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{ x:{display:false},
+        y:{ min:yMin, max:yMax, grid:{color:'rgba(255,255,255,.04)'},
+          ticks:{color:'#4a7a9b',font:{size:8,family:'Share Tech Mono'},maxTicksLimit:3},
+          border:{color:'rgba(255,255,255,.05)'} } } }
+  });
+}
+
+const charts = {
+  temp: makeChart('chartTemp','#00d4ff',tempD,50,115),
+  vibr: makeChart('chartVibr','#00ff88',vibrD,0,11),
+  pres: makeChart('chartPres','#aa88ff',presD,55,125),
+  load: makeChart('chartLoad','#ffcc00',loadD,0.35,1.15),
+  hum:  makeChart('chartHum', '#ff8800',humD, 5,90),
+};
+
+const riskChart = new Chart($('chartRisk').getContext('2d'), {
+  type:'line',
+  data:{ labels, datasets:[
+    { data:riskD, borderColor:'#00d4ff', borderWidth:1.5, pointRadius:0, tension:0.3, fill:true,
+      backgroundColor: c2=>{ const g=c2.chart.ctx.createLinearGradient(0,0,0,c2.chart.height);
+        g.addColorStop(0,'#ff224430'); g.addColorStop(.5,'#ffcc0015'); g.addColorStop(1,'#00d4ff05'); return g; }
+    },
+    { data:thrD, borderColor:'#ff2244', borderWidth:1, pointRadius:0, borderDash:[4,4], fill:false }
+  ]},
+  options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0},
+    plugins:{legend:{display:false},tooltip:{enabled:false}},
+    scales:{ x:{display:false},
+      y:{ min:0,max:1, grid:{color:'rgba(255,255,255,.04)'},
+        ticks:{color:'#4a7a9b',font:{size:8,family:'Share Tech Mono'},maxTicksLimit:4,
+               callback:v=>(v*100).toFixed(0)+'%'},
+        border:{color:'rgba(255,255,255,.05)'} } } }
+});
+
+// ═══ CHART TOGGLE & SCALE ═════════════════════
+function updateGridLayout() {
+  const vis = Object.entries(chartVisible).filter(([,v])=>v).length;
+  const cols = vis <= 2 ? vis : vis === 3 ? 3 : 4;
+  D.chartsGrid.style.gridTemplateColumns = `repeat(${cols||1},1fr)`;
+  D.chartsGrid.style.gridTemplateRows = '1fr';
+  Object.entries(chartVisible).forEach(([k,v])=>{
+    $('cc-'+k).classList.toggle('hidden', !v);
+  });
+  // Resize charts after layout changes
+  setTimeout(()=>{ Object.values(charts).forEach(c=>c.resize()); riskChart.resize(); }, 60);
+}
+
+function toggleChart(key, visible) {
+  chartVisible[key] = visible;
+  updateGridLayout();
+}
+
+function adjustScale(key, dir) {
+  const r = yRanges[key];
+  let idx = scaleIdx[key] + dir;
+  idx = Math.max(0, Math.min(scaleSteps.length-1, idx));
+  scaleIdx[key] = idx;
+  const step = scaleSteps[idx];
+  const sc = $('sc-'+key);
+  if (step === null) {
+    charts[key].options.scales.y.min = r.min;
+    charts[key].options.scales.y.max = r.max;
+    sc.textContent = 'auto';
+  } else {
+    // Zoom around midpoint of default range
+    const mid = (r.min + r.max) / 2;
+    const half = (r.max - r.min) / 2 * (1 / Math.pow(1.5, scaleIdx[key]));
+    charts[key].options.scales.y.min = Math.max(r.min - half*0.2, mid - half);
+    charts[key].options.scales.y.max = mid + half;
+    sc.textContent = `×${Math.round(Math.pow(1.5, scaleIdx[key])*10)/10}`;
+  }
+  charts[key].update('none');
+}
+
+// ═══ GAUGE UPDATE ═════════════════════════════
+function pct(v,mn,mx){ return Math.max(0,Math.min(100,(v-mn)/(mx-mn)*100)); }
+
+function gauge(gcId,gvId,gbId, val,unit,dMin,dMax,wLo,wHi,dLo,dHi) {
+  const isDanger = (dLo!==null&&val<dLo)||(dHi!==null&&val>dHi);
+  const isWarn   = !isDanger&&((wLo!==null&&val<wLo)||(wHi!==null&&val>wHi));
+  const cls = isDanger?' danger':isWarn?' warn':'';
+  $(gcId).className='g-card'+cls;
+  const v=$(gvId); v.className='g-val'+cls;
+  v.innerHTML=val.toFixed(val<10?3:1)+`<span class="g-unit">${unit}</span>`;
+  const b=$(gbId); b.style.width=pct(val,dMin,dMax)+'%'; b.className='g-fill'+cls;
+}
+
+// ═══ RISK UI ══════════════════════════════════
+function updateRisk(risk) {
+  const p=Math.round(risk*100);
+  D.riskArc.style.strokeDashoffset=CIRC*(1-risk);
+  D.rPct.textContent=p+'%';
+  let col,lbl;
+  if(risk>=0.5){col='var(--red)';lbl='КРИТИЧНО';}
+  else if(risk>=0.3){col='var(--orange)';lbl='ВНИМАНИЕ';}
+  else if(risk>=0.15){col='var(--yellow)';lbl='НАБЛЮДЕНИЕ';}
+  else{col='var(--green)';lbl='НОРМА';}
+  D.riskArc.style.stroke=col; D.rPct.style.color=col;
+  D.rLbl.style.color=col; D.rLbl.textContent=lbl;
+  D.rSub.textContent='Вероятность инцидента: '+p+'%';
+}
+
+function updateRecs(risk,d) {
+  const r=[];
+  if(d.temperature>85)r.push(['⚠️','Перегрев: проверьте охлаждение']);
+  if(d.vibration>6)r.push(['⚠️','Вибрация: проверьте подшипники']);
+  if(d.pressure<70)r.push(['⚠️','Низкое давление: контроль уплотнений']);
+  if(d.pressure>110)r.push(['⚠️','Высокое давление: снизьте нагрузку']);
+  if(d.load_factor>0.95)r.push(['⚠️','Перегрузка: снизьте нагрузку']);
+  if(d.humidity>70)r.push(['💧','Высокая влажность: угроза коррозии']);
+  if(risk>=0.5)r.push(['🔴','СТОП: экстренное ТО!']);
+  else if(risk>=0.3)r.push(['🟡','Запланируйте ТО в 24–48 ч']);
+  if(!r.length)r.push(['✅','Все параметры в норме. ТО через 14 дней.']);
+  D.recList.innerHTML=r.map(([i,t])=>`<div class="rec-item"><span>${i}</span><span>${t}</span></div>`).join('');
+}
+
+function addAlert(type,msg) {
+  const now=new Date().toLocaleTimeString('ru-RU');
+  const cls=type==='danger'?'a-danger':type==='warning'?'a-warn':'a-info';
+  const bcls=type==='danger'?'bc':type==='warning'?'bw':'bi';
+  const btxt=type==='danger'?'КРИТИЧНО':type==='warning'?'ВНИМАНИЕ':'INFO';
+  const el=document.createElement('div');
+  el.className='a-item '+cls;
+  el.innerHTML=`<div class="a-time">${now}</div><div class="a-msg"><span class="badge ${bcls}">${btxt}</span>${msg}</div>`;
+  D.aList.insertBefore(el,D.aList.firstChild);
+  while(D.aList.children.length>30)D.aList.removeChild(D.aList.lastChild);
+  alertCnt++; D.aCnt.textContent=alertCnt; D.aCnt.classList.add('on');
+}
+
+// ═══ TICK ═════════════════════════════════════
+function onTick(d) {
+  // Gauges
+  gauge('gc-temp','gv-temp','gb-temp', d.temperature,'°C', 50,110, 60,80, null,90);
+  gauge('gc-vibr','gv-vibr','gb-vibr', d.vibration,  'mm/s',0,10,  2,5,  null,7);
+  gauge('gc-pres','gv-pres','gb-pres', d.pressure,   'кПа',60,118, 85,105,70,110);
+  gauge('gc-load','gv-load','gb-load', d.load_factor,'о.е.',0.4,1.1,0.55,0.85,null,0.95);
+  gauge('gc-hum', 'gv-hum', 'gb-hum',  d.humidity,   '%',  7,87,  30,60, null,72);
+
+  // Derived
+  D.tpr.textContent = (d.temp_pressure_ratio||0).toFixed(4);
+  D.vli.textContent = (d.vibration_load_interaction||0).toFixed(4);
+
+  // Risk
+  updateRisk(d.risk); updateRecs(d.risk,d);
+
+  // Stats
+  const n=d.index+1;
+  D.proc.textContent=n; D.progTxt.textContent=n+' / '+d.total;
+  D.progFill.style.width=(n/d.total*100)+'%';
+
+  if(d.risk>=0.5){
+    incCnt++; D.inc.textContent=incCnt;
+    D.status.textContent='АВАРИЯ'; D.status.className='s-val crit';
+    D.flash.classList.remove('on'); void D.flash.offsetWidth; D.flash.classList.add('on');
+    D.mBody.innerHTML=`Модель Random Forest: <b style="color:var(--red)">риск ${Math.round(d.risk*100)}%</b><br>`+
+      `T=${d.temperature.toFixed(1)}°C | V=${d.vibration.toFixed(2)} mm/s | P=${d.pressure.toFixed(1)} кПа<br>`+
+      `<b>⚡ Немедленно остановите оборудование!</b>`;
+    D.incModal.classList.add('on');
+    addAlert('danger',`Инцидент #${incCnt}: ${Math.round(d.risk*100)}% риск`);
+  } else if(d.risk>=0.3){
+    warnCnt++; D.warn.textContent=warnCnt;
+    D.status.textContent='ВНИМАНИЕ'; D.status.className='s-val warn';
+    if(d.risk>=0.4)addAlert('warning',`Риск ${Math.round(d.risk*100)}% — T=${d.temperature.toFixed(1)}°C`);
+  } else {
+    if(D.status.textContent!=='АВАРИЯ'){D.status.textContent='НОРМА';D.status.className='s-val ok';}
+  }
+
+  // Slide window
+  if(labels.length>=WIN){labels.shift();tempD.shift();vibrD.shift();presD.shift();loadD.shift();humD.shift();riskD.shift();thrD.shift();}
+  labels.push(String(d.index));
+  tempD.push(d.temperature); vibrD.push(d.vibration); presD.push(d.pressure);
+  loadD.push(d.load_factor); humD.push(d.humidity); riskD.push(d.risk); thrD.push(0.5);
+
+  charts.temp.update('none'); charts.vibr.update('none');
+  charts.pres.update('none'); charts.load.update('none');
+  charts.hum.update('none');
+  riskChart.update('none');
+}
+
+// ═══ CONTROLS ═════════════════════════════════
+function togglePlay(){
+  playing=!playing;
+  if(playing){socket.emit('resume');D.playBtn.textContent='⏸ ПАУЗА';D.playBtn.className='btn btn-p';}
+  else{socket.emit('pause');D.playBtn.textContent='▶ ПРОДОЛЖИТЬ';D.playBtn.className='btn btn-d';}
+}
+function setSpd(m,btn){
+  document.querySelectorAll('.spd-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); socket.emit('set_speed',{multiplier:m});
+}
+function doReset(){
+  socket.emit('reset');
+  incCnt=0;warnCnt=0;alertCnt=0;
+  [labels,tempD,vibrD,presD,loadD,humD,riskD,thrD].forEach(a=>a.length=0);
+  Object.values(charts).forEach(c=>c.update('none')); riskChart.update('none');
+  D.proc.textContent='0'; D.inc.textContent='0'; D.warn.textContent='0';
+  D.status.textContent='НОРМА'; D.status.className='s-val ok';
+  D.progTxt.textContent='0 / '+totalRows; D.progFill.style.width='0%';
+  D.aList.innerHTML='<div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Симуляция сброшена.</div></div>';
+  D.aCnt.classList.remove('on'); updateRisk(0);
+  playing=true; D.playBtn.textContent='⏸ ПАУЗА'; D.playBtn.className='btn btn-p';
+  setTimeout(()=>socket.emit('start_after_reset'),100);
+}
+
+// Clock
+setInterval(()=>{D.clk.textContent=new Date().toLocaleTimeString('ru-RU');},1000);
+
+// ═══ WEBSOCKET ════════════════════════════════
+const socket=io(window.location.origin, {
+  transports:['polling','websocket'],  // polling first — more reliable in Docker
+  upgrade:true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 10,
+});
+
+let overlayHidden = false;
+
+socket.on('connect',()=>{
+  $('ovErr').style.display='none';
+  // On reconnect, server sends 'ready' again automatically via on_connect
+  // Nothing to do here — wait for 'ready'
+});
+socket.on('connect_error',(err)=>{
+  console.error('WS error:', err);
+  $('ovErr').style.display='block';
+});
+socket.on('disconnect',()=>{
+  if(overlayHidden) {
+    // Show reconnecting message but don't reset data
+    $('ovErr').style.display='none';
+    $('ovErr').textContent='Переподключение...';
+  }
+});
+
+socket.on('ready',data=>{
+  totalRows=data.total;
+  D.progTxt.textContent = D.proc.textContent + ' / ' + data.total;
+  if(!overlayHidden){
+    D.overlay.style.display='none';
+    overlayHidden=true;
+    addAlert('info',`Сервер готов: ${data.total} записей`);
+    addAlert('info','Random Forest | StandardScaler | 7 признаков');
+  }
+  // Small delay to ensure server-side session is ready before emitting start
+  setTimeout(()=>socket.emit('start'), 200);
+});
+
+socket.on('tick', onTick);
+
+socket.on('sim_done',data=>{
+  playing=false; D.playBtn.textContent='✓ ЗАВЕРШЕНО'; D.playBtn.className='btn';
+  addAlert('info',`Симуляция завершена. Обработано ${data.total} точек.`);
+});
+socket.on('reset_ok',data=>{
+  totalRows=data.total;
+  D.progTxt.textContent='0 / '+data.total;
+});
+
+// Init grid layout
+updateGridLayout();
+</script>
+</body>
+</html>
