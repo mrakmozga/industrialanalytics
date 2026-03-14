@@ -1,12 +1,47 @@
 services:
+
+  # ── ML Service (FastAPI) ─────────────────────────────────────
+  ml:
+    build:
+      context: .
+      dockerfile: Dockerfile.ml
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      # Положите pkl-файлы в ./models/
+      - ./models:/app/models:ro
+    environment:
+      - MODEL_PATH=models/incident_random_forest_model.pkl
+      - SCALER_PATH=models/scaler.pkl
+      - FEATURES_PATH=models/model_features.pkl
+      - ML_HOST=0.0.0.0
+      - ML_PORT=8000
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── Dashboard (Flask + SocketIO) ─────────────────────────────
   dashboard:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     restart: unless-stopped
+    depends_on:
+      ml:
+        condition: service_healthy
     volumes:
-      # Кладёте CSV-файлы в папку ./data рядом с docker-compose.yml
       - ./data:/app/data:ro
     environment:
       - DATA_CSV=data/equipment_simulation_with_anomalies_25000.csv
-      - PREDICTIONS_CSV=data/predictions.csv
+      - PREDICTIONS_CSV=data/predictions.csv   # fallback если ML недоступен
+      - ML_MODE=live                           # 'live' | 'cached'
+      - ML_URL=http://ml:8000
+      - HOST=0.0.0.0
+      - PORT=5000

@@ -31,6 +31,12 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .logo-sub{font-size:10px;color:var(--dim);letter-spacing:2px}
 .hcenter{display:flex;align-items:center;gap:16px}
 .live{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);font-size:11px;color:var(--green)}
+.ml-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;letter-spacing:1px;font-weight:600}
+.ml-badge.live{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--accent)}
+.ml-badge.cached{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.3);color:var(--yellow)}
+.ml-dot{width:5px;height:5px;border-radius:50%;animation:pg 1.4s infinite}
+.ml-badge.live .ml-dot{background:var(--accent)}
+.ml-badge.cached .ml-dot{background:var(--yellow)}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pg 1.4s infinite}
 @keyframes pg{0%,100%{opacity:1}50%{opacity:.5}}
 .htime{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--accent)}
@@ -166,6 +172,9 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .a-head{padding:7px 11px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .a-clear{font-size:9px;color:var(--dim);cursor:pointer;border:1px solid var(--border);background:transparent;border-radius:3px;padding:1px 6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:.2s}
 .a-clear:hover{color:var(--red);border-color:var(--red)}
+.a-export{font-size:9px;color:var(--dim);cursor:pointer;border:1px solid var(--border);background:transparent;
+  border-radius:3px;padding:1px 6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;transition:.2s}
+.a-export:hover{color:var(--green);border-color:var(--green)}
 .a-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
 .a-cnt{font-size:10px;font-weight:700;background:rgba(255,34,68,.2);color:var(--red);padding:1px 6px;border-radius:8px;display:none}
 .a-cnt.on{display:block}
@@ -246,6 +255,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
   </div>
   <div class="hcenter">
     <div class="live"><div class="live-dot"></div>ONLINE</div>
+    <div class="ml-badge live" id="mlBadge"><div class="ml-dot"></div><span id="mlBadgeTxt">ML LIVE</span></div>
     <div class="htime" id="clk">--:--:--</div>
     <div class="auto-banner" id="autoBanner"><span>⚡</span><span>АКТИВНЫЙ РЕЖИМ</span></div>
     <div class="spd">
@@ -271,12 +281,12 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
     <div class="g-card" id="gc-temp">
       <div class="g-head"><span class="g-name">🌡 Температура</span><span class="g-val" id="gv-temp">--<span class="g-unit">°C</span></span></div>
       <div class="g-track"><div class="g-fill" id="gb-temp" style="width:0%"></div></div>
-      <div class="g-mm"><span>50</span><span>норма 60–80°C</span><span>110</span></div>
+      <div class="g-mm"><span>50</span><span>норма 62–78°C</span><span>110</span></div>
     </div>
     <div class="g-card" id="gc-vibr">
       <div class="g-head"><span class="g-name">〜 Вибрация</span><span class="g-val" id="gv-vibr">--<span class="g-unit">mm/s</span></span></div>
       <div class="g-track"><div class="g-fill" id="gb-vibr" style="width:0%"></div></div>
-      <div class="g-mm"><span>0</span><span>норма 2–5 mm/s</span><span>10</span></div>
+      <div class="g-mm"><span>0</span><span>норма 2.3–4.7 mm/s</span><span>10</span></div>
     </div>
     <div class="g-card" id="gc-pres">
       <div class="g-head"><span class="g-name">⬆ Давление</span><span class="g-val" id="gv-pres">--<span class="g-unit">кПа</span></span></div>
@@ -286,12 +296,12 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
     <div class="g-card" id="gc-load">
       <div class="g-head"><span class="g-name">⚡ Нагрузка</span><span class="g-val" id="gv-load">--<span class="g-unit">о.е.</span></span></div>
       <div class="g-track"><div class="g-fill" id="gb-load" style="width:0%"></div></div>
-      <div class="g-mm"><span>0.4</span><span>норма 0.55–0.85</span><span>1.1</span></div>
+      <div class="g-mm"><span>0.4</span><span>норма 0.43–0.97</span><span>1.1</span></div>
     </div>
     <div class="g-card" id="gc-hum">
       <div class="g-head"><span class="g-name">💧 Влажность</span><span class="g-val" id="gv-hum">--<span class="g-unit">%</span></span></div>
       <div class="g-track"><div class="g-fill" id="gb-hum" style="width:0%"></div></div>
-      <div class="g-mm"><span>7</span><span>норма 30–60%</span><span>87</span></div>
+      <div class="g-mm"><span>7</span><span>норма 28–62%</span><span>87</span></div>
     </div>
 
     <!-- Chart toggles -->
@@ -358,17 +368,17 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
       <div class="s-card"><div class="s-lbl">Точек обработано</div><div class="s-val" id="st-proc">0</div><div class="s-sub" id="st-total-sub" style="visibility:hidden">—</div></div>
       <div class="s-card"><div class="s-lbl">Инцидентов</div><div class="s-val crit" id="st-inc">0</div><div class="s-sub">обнаружено моделью</div></div>
       <div class="s-card"><div class="s-lbl">Предупреждений</div><div class="s-val warn" id="st-warn">0</div><div class="s-sub">риск &gt; 30%</div></div>
-      <div class="s-card"><div class="s-lbl">Статус системы</div><div class="s-val ok" id="st-status">НОРМА</div><div class="s-sub">Random Forest v1.0</div></div>
+      <div class="s-card"><div class="s-lbl">Статус системы</div><div class="s-val ok" id="st-status">НОРМА</div><div class="s-sub">ML модель активна</div></div>
       <div class="s-card"><div class="s-lbl">Время работы</div><div class="s-val" id="st-uptime" style="font-size:15px;color:var(--accent)">00:00:00</div><div class="s-sub">с начала сессии</div></div>
     </div>
 
     <!-- Risk timeline — СВЕРХУ -->
     <div class="risk-panel">
       <div class="rp-head">
-        <span class="rp-title">📈 Временной ряд вероятности отказа (Random Forest)</span>
-        <div class="prog">
-          <span id="progTxt">0 / —</span>
-          <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+        <span class="rp-title">📈 Временной ряд вероятности отказа</span>
+        <div style="display:flex;gap:14px;align-items:center;font-size:9px;font-family:'Share Tech Mono',monospace">
+          <span style="color:#ff2244">── 50% инцидент</span>
+          <span style="color:#ffcc00">── 30% предупреждение</span>
         </div>
       </div>
       <canvas id="chartRisk"></canvas>
@@ -405,7 +415,7 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
       <div id="recList"><div class="rec-item"><span>✅</span><span>Все параметры в норме.</span></div></div>
     </div>
     <div class="alerts">
-      <div class="a-head"><span class="a-title">📋 Журнал событий</span><div style="display:flex;gap:6px;align-items:center"><span class="a-cnt" id="aCnt">0</span><button class="a-clear" onclick="clearAlerts()">ОЧИСТИТЬ</button></div></div>
+      <div class="a-head"><span class="a-title">📋 Журнал событий</span><div style="display:flex;gap:6px;align-items:center"><span class="a-cnt" id="aCnt">0</span><button class="a-export" onclick="exportLog.download()">⬇ CSV</button><button class="a-clear" onclick="clearAlerts()">ОЧИСТИТЬ</button></div></div>
       <div class="a-list" id="aList">
         <div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Подключение...</div></div>
       </div>
@@ -416,7 +426,8 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 
 <script>
 // ═══ CONSTANTS ════════════════════════════════
-const TOTAL  = {{ total_rows }};
+const TOTAL   = {{ total_rows }};
+const ML_MODE_INIT = "{{ ml_mode }}";
 const S_MEAN  = {{ scaler_mean }};
 const S_SCALE = {{ scaler_scale }};
 const WIN    = 100;
@@ -429,7 +440,7 @@ const D = {
   clk:$('clk'), flash:$('flash'), incModal:$('incModal'), mBody:$('mBody'),
   playBtn:$('playBtn'),
   proc:$('st-proc'), inc:$('st-inc'), warn:$('st-warn'), status:$('st-status'),
-  progTxt:$('progTxt'), progFill:$('progFill'),
+  // progTxt and progFill removed (no longer in HTML)
   riskArc:$('riskArc'), rPct:$('rPct'), rLbl:$('rLbl'), rSub:$('rSub'),
   tpr:$('feat-tpr'), vli:$('feat-vli'),
   recList:$('recList'), aList:$('aList'), aCnt:$('aCnt'), uptime:$('st-uptime'),
@@ -438,7 +449,7 @@ const D = {
 
 // ═══ STATE ════════════════════════════════════
 let playing=true, incCnt=0, warnCnt=0, alertCnt=0, totalRows=0;
-const labels=[],tempD=[],vibrD=[],presD=[],loadD=[],humD=[],riskD=[],thrD=[];
+const labels=[],tempD=[],vibrD=[],presD=[],loadD=[],humD=[],riskD=[],thrD=[],warnD=[];
 
 // Scale levels per chart (index into scaleSteps)
 const scaleSteps = [null, 0.5, 1, 2, 5, 10, 20, 50, 100, 200];
@@ -484,14 +495,26 @@ const riskChart = new Chart($('chartRisk').getContext('2d'), {
       backgroundColor: c2=>{ const g=c2.chart.ctx.createLinearGradient(0,0,0,c2.chart.height);
         g.addColorStop(0,'#ff224430'); g.addColorStop(.5,'#ffcc0015'); g.addColorStop(1,'#00d4ff05'); return g; }
     },
-    { data:thrD, borderColor:'#ff2244', borderWidth:1, pointRadius:0, borderDash:[4,4], fill:false }
+    { data:thrD,  borderColor:'#ff2244', borderWidth:1,   pointRadius:0, borderDash:[4,4], fill:false },
+    { data:warnD, borderColor:'#ffcc00', borderWidth:1,   pointRadius:0, borderDash:[3,5], fill:false }
   ]},
   options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0},
     plugins:{legend:{display:false},tooltip:{enabled:false}},
     scales:{ x:{display:false},
       y:{ min:0,max:1, grid:{color:'rgba(255,255,255,.04)'},
-        ticks:{color:'#4a7a9b',font:{size:8,family:'Share Tech Mono'},maxTicksLimit:4,
-               callback:v=>(v*100).toFixed(0)+'%'},
+        ticks:{
+          color: ctx => {
+            const v = ctx.tick.value;
+            if (v === 0.5) return '#ff2244';
+            if (v === 0.3) return '#ffcc00';
+            return '#4a7a9b';
+          },
+          font:{size:8,family:'Share Tech Mono'},
+          callback: v => (v*100).toFixed(0)+'%'
+        },
+        afterBuildTicks: axis => { axis.ticks = [
+          {value:0},{value:0.3},{value:0.5},{value:1}
+        ]; },
         border:{color:'rgba(255,255,255,.05)'} } } }
 });
 
@@ -569,12 +592,12 @@ function updateRisk(risk) {
 
 function updateRecs(risk,d) {
   const r=[];
-  if(d.temperature>85)r.push(['⚠️','Перегрев: проверьте охлаждение']);
-  if(d.vibration>6)r.push(['⚠️','Вибрация: проверьте подшипники']);
+  if(d.temperature>78)r.push(['⚠️','Температура выше нормы: проверьте охлаждение']);
+  if(d.vibration>4.7)r.push(['⚠️','Вибрация выше нормы: проверьте подшипники']);
   if(d.pressure<70)r.push(['⚠️','Низкое давление: контроль уплотнений']);
   if(d.pressure>110)r.push(['⚠️','Высокое давление: снизьте нагрузку']);
-  if(d.load_factor>0.95)r.push(['⚠️','Перегрузка: снизьте нагрузку']);
-  if(d.humidity>70)r.push(['💧','Высокая влажность: угроза коррозии']);
+  if(d.load_factor>0.97)r.push(['⚠️','Перегрузка: снизьте рабочую нагрузку']);
+  if(d.humidity>62)r.push(['💧','Высокая влажность: угроза коррозии']);
   if(risk>=0.5)r.push(['🔴','СТОП: экстренное ТО!']);
   else if(risk>=0.3)r.push(['🟡','Запланируйте ТО в 24–48 ч']);
   if(!r.length)r.push(['✅','Все параметры в норме. ТО через 14 дней.']);
@@ -604,12 +627,13 @@ function addAlert(type, msg, incidentData=null) {
 
 // ═══ TICK ═════════════════════════════════════
 function onTick(d) {
+  if (!d || typeof d.risk === 'undefined') return;  // guard against malformed tick
   // Gauges
-  gauge('gc-temp','gv-temp','gb-temp', d.temperature,'°C', 50,110, 60,80, null,90);
-  gauge('gc-vibr','gv-vibr','gb-vibr', d.vibration,  'mm/s',0,10,  2,5,  null,7);
+  gauge('gc-temp','gv-temp','gb-temp', d.temperature,'°C', 50,110, 62,78, null,85);
+  gauge('gc-vibr','gv-vibr','gb-vibr', d.vibration,  'mm/s',0,10,  2.3,4.7,  null,6.1);
   gauge('gc-pres','gv-pres','gb-pres', d.pressure,   'кПа',60,118, 85,105,70,110);
-  gauge('gc-load','gv-load','gb-load', d.load_factor,'о.е.',0.4,1.1,0.55,0.85,null,0.95);
-  gauge('gc-hum', 'gv-hum', 'gb-hum',  d.humidity,   '%',  7,87,  30,60, null,72);
+  gauge('gc-load','gv-load','gb-load', d.load_factor,'о.е.',0.4,1.1,0.43,0.97,null,1.0);
+  gauge('gc-hum', 'gv-hum', 'gb-hum',  d.humidity,   '%',  7,87,  28,62, null,70);
 
   // Derived
   D.tpr.textContent = (d.temp_pressure_ratio||0).toFixed(4);
@@ -620,14 +644,13 @@ function onTick(d) {
 
   // Stats
   const n=d.index+1;
-  D.proc.textContent=n; D.progTxt.textContent=n+' / '+d.total;
-  D.progFill.style.width=(n/d.total*100)+'%';
+  D.proc.textContent=n;
 
   if(d.risk>=0.5){
     incCnt++; D.inc.textContent=incCnt;
     D.status.textContent='АВАРИЯ'; D.status.className='s-val crit';
     D.flash.classList.remove('on'); void D.flash.offsetWidth; D.flash.classList.add('on');
-    D.mBody.innerHTML=`Модель Random Forest: <b style="color:var(--red)">риск ${Math.round(d.risk*100)}%</b><br>`+
+    D.mBody.innerHTML=`Вероятность отказа: <b style="color:var(--red)">${Math.round(d.risk*100)}%</b><br>`+
       `T=${d.temperature.toFixed(1)}°C | V=${d.vibration.toFixed(2)} mm/s | P=${d.pressure.toFixed(1)} кПа<br>`+
       `<b>⚡ Немедленно остановите оборудование!</b>`;
     D.incModal.classList.add('on');
@@ -643,16 +666,17 @@ function onTick(d) {
   }
 
   // Slide window
-  if(labels.length>=WIN){labels.shift();tempD.shift();vibrD.shift();presD.shift();loadD.shift();humD.shift();riskD.shift();thrD.shift();}
+  if(labels.length>=WIN){labels.shift();tempD.shift();vibrD.shift();presD.shift();loadD.shift();humD.shift();riskD.shift();thrD.shift();warnD.shift();}
   labels.push(String(d.index));
   tempD.push(d.temperature); vibrD.push(d.vibration); presD.push(d.pressure);
-  loadD.push(d.load_factor); humD.push(d.humidity); riskD.push(d.risk); thrD.push(0.5);
+  loadD.push(d.load_factor); humD.push(d.humidity); riskD.push(d.risk); thrD.push(0.5); warnD.push(0.3);
 
   charts.temp.update('none'); charts.vibr.update('none');
   charts.pres.update('none'); charts.load.update('none');
   charts.hum.update('none');
   riskChart.update('none');
   if (!heightSynced) { syncChartsHeight(); heightSynced = true; }
+  exportLog.addTick(d);
 }
 
 
@@ -704,6 +728,7 @@ function toggleMode() {
     btn.innerHTML = '🤖 АКТИВНЫЙ<span class="mode-badge" id="modeBadge">АВТО</span>';
     $('autoBanner').classList.add('on');
     addAlert('info', 'Активный режим включён. Система будет автономно останавливать оборудование при риске ≥ 50%.');
+    exportLog.addEvent('Переключение в АКТИВНЫЙ режим');
   } else {
     btn.className = 'btn btn-mode observe';
     btn.innerHTML = '👁 НАБЛЮДЕНИЕ<span class="mode-badge" id="modeBadge" style="display:none">АВТО</span>';
@@ -714,6 +739,7 @@ function toggleMode() {
       $('stoppedOverlay').classList.remove('on');
     }
     addAlert('info', 'Режим наблюдения. Система только отображает данные.');
+    exportLog.addEvent('Переключение в режим НАБЛЮДЕНИЯ');
   }
 }
 
@@ -724,6 +750,7 @@ function operatorRestart() {
   D.playBtn.textContent = '⏸ ПАУЗА'; D.playBtn.className = 'btn btn-p';
   socket.emit('resume');
   addAlert('info', '▶ Оператор перезапустил оборудование. Мониторинг возобновлён.');
+  exportLog.addEvent('Оператор перезапустил оборудование');
 }
 
 function handleActiveMode(risk, d) {
@@ -735,6 +762,7 @@ function handleActiveMode(risk, d) {
     D.playBtn.textContent = '⏸ СТОП'; D.playBtn.className = 'btn btn-d';
     $('stoppedOverlay').classList.add('on');
     addAlert('danger', `🤖 АВТОНОМНОЕ РЕШЕНИЕ: оборудование остановлено. Риск ${Math.round(risk*100)}% — T=${d.temperature.toFixed(1)}°C, V=${d.vibration.toFixed(2)}mm/s, P=${d.pressure.toFixed(1)}кПа`);
+    exportLog.addEvent(`Авто-остановка: риск ${Math.round(risk*100)}%, T=${d.temperature.toFixed(1)}, V=${d.vibration.toFixed(2)}, P=${d.pressure.toFixed(1)}`);
   }
 }
 
@@ -754,6 +782,76 @@ function syncChartsHeight() {
 }
 // Run once after first tick arrives (sidebar is populated)
 let heightSynced = false;
+
+// ── Лог записей для экспорта ───────────────────
+// Хранит каждый тик + системные события
+const exportLog = (() => {
+  const rows = [];  // {ts, index, temperature, vibration, pressure, load_factor, humidity, risk, status, type, note}
+
+  // Добавить строку телеметрии
+  function addTick(d) {
+    const status = d.risk >= 0.5 ? 'ИНЦИДЕНТ' : d.risk >= 0.3 ? 'ПРЕДУПРЕЖДЕНИЕ' : 'НОРМА';
+    rows.push({
+      timestamp:    new Date().toLocaleString('ru-RU'),
+      index:        d.index,
+      temperature:  d.temperature.toFixed(2),
+      vibration:    d.vibration.toFixed(3),
+      pressure:     d.pressure.toFixed(2),
+      load_factor:  d.load_factor.toFixed(3),
+      humidity:     d.humidity.toFixed(2),
+      risk_pct:     (d.risk * 100).toFixed(1),
+      status:       status,
+      type:         'ТЕЛЕМЕТРИЯ',
+      note:         ''
+    });
+    // Не храним больше 25000 строк в памяти
+    if (rows.length > 25000) rows.shift();
+  }
+
+  // Добавить системное событие
+  function addEvent(note) {
+    rows.push({
+      timestamp:   new Date().toLocaleString('ru-RU'),
+      index:       '',
+      temperature: '', vibration: '', pressure: '',
+      load_factor: '', humidity: '', risk_pct: '',
+      status:      '',
+      type:        'СОБЫТИЕ',
+      note:        note
+    });
+  }
+
+  // Скачать CSV
+  function download() {
+    if (rows.length === 0) {
+      addAlert('info', 'Нет данных для экспорта.');
+      return;
+    }
+    const cols = ['timestamp','index','temperature','vibration','pressure',
+                  'load_factor','humidity','risk_pct','status','type','note'];
+    const header = cols.join(';');
+    const body   = rows.map(r => cols.map(c => {
+      const v = String(r[c] ?? '');
+      // Экранируем значения с запятой/точкой с запятой
+      return v.includes(';') || v.includes('"') ? `"${v.replace(/"/g,'""')}"` : v;
+    }).join(';')).join('\n');
+    const csv = '\uFEFF' + header + '\n' + body;
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `industrai_log_${new Date().toISOString().slice(0,19).replace(/[T:]/g,'-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addAlert('info', `Экспортировано ${rows.length} строк в CSV.`);
+  }
+
+  return { addTick, addEvent, download };
+})();
+
+// Перекрываем глобальное имя функции — кнопка вызывает exportLog()
+// но exportLog уже занят объектом, поэтому кнопка вызывает exportLog.download
+// Патчим onclick кнопки при инициализации
 // ═══ CONTROLS ═════════════════════════════════
 function togglePlay(){
   playing=!playing;
@@ -767,11 +865,10 @@ function setSpd(m,btn){
 function doReset(){
   socket.emit('reset');
   incCnt=0;warnCnt=0;alertCnt=0;
-  [labels,tempD,vibrD,presD,loadD,humD,riskD,thrD].forEach(a=>a.length=0);
+  [labels,tempD,vibrD,presD,loadD,humD,riskD,thrD,warnD].forEach(a=>a.length=0);
   Object.values(charts).forEach(c=>c.update('none')); riskChart.update('none');
   D.proc.textContent='0'; D.inc.textContent='0'; D.warn.textContent='0';
   D.status.textContent='НОРМА'; D.status.className='s-val ok';
-  D.progTxt.textContent='0 / '+totalRows; D.progFill.style.width='0%';
   D.aList.innerHTML='<div class="a-item a-info"><div class="a-time">СИСТЕМА</div><div class="a-msg"><span class="badge bi">INFO</span>Симуляция сброшена.</div></div>';
   D.aCnt.classList.remove('on'); updateRisk(0);
   playing=true; D.playBtn.textContent='⏸ ПАУЗА'; D.playBtn.className='btn btn-p';
@@ -818,15 +915,28 @@ socket.on('disconnect',()=>{
 });
 
 socket.on('ready',data=>{
-  totalRows=data.total;
-  D.progTxt.textContent = D.proc.textContent + ' / ' + data.total;
-  if(!overlayHidden){
-    D.overlay.style.display='none';
-    overlayHidden=true;
-    addAlert('info',`Сервер готов: ${data.total} записей`);
-    addAlert('info','Random Forest | StandardScaler | 7 признаков');
+  try {
+    totalRows = data.total || 0;
+    if(!overlayHidden){
+      if(D.overlay) D.overlay.style.display='none';
+      overlayHidden=true;
+      addAlert('info',`Сервер готов: ${data.total} записей`);
+    exportLog.addEvent(`Сессия начата. Всего записей: ${data.total}`);
+      addAlert('info','ML сервис: инференс в реальном времени');
+    }
+    // ML mode badge (null-safe)
+    const badge = $('mlBadge');
+    const txt   = $('mlBadgeTxt');
+    if (badge && txt) {
+      if (data.ml_mode === 'live') {
+        badge.className = 'ml-badge live'; txt.textContent = 'ML LIVE';
+      } else {
+        badge.className = 'ml-badge cached'; txt.textContent = 'ML CACHED';
+      }
+    }
+  } catch(e) {
+    console.error('[ready handler error]', e);
   }
-  // Small delay to ensure server-side session is ready before emitting start
   setTimeout(()=>socket.emit('start'), 200);
 });
 
@@ -835,10 +945,10 @@ socket.on('tick', onTick);
 socket.on('sim_done',data=>{
   playing=false; D.playBtn.textContent='✓ ЗАВЕРШЕНО'; D.playBtn.className='btn';
   addAlert('info',`Симуляция завершена. Обработано ${data.total} точек.`);
+  exportLog.addEvent(`Симуляция завершена. Обработано ${data.total} точек`);
 });
 socket.on('reset_ok',data=>{
   totalRows=data.total;
-  D.progTxt.textContent='0 / '+data.total;
 });
 
 // Init grid layout
